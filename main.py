@@ -1,37 +1,33 @@
+import logging
 from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
+from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes, MessageHandler, filters
 
 # Настройка логирования 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO) 
 
 # Функция обработки команды /start 
-def start(update, context): 
-    context.bot.send_message(chat_id=update.effective_chat.id, text='Привет! Я бот. Напиши "start", чтобы продолжить.') 
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE): 
+    await update.message.reply_text('Привет! Я бот. Напиши "start", чтобы продолжить.') 
 
 # Функция обработки входящих сообщений 
-def handle_message(update, context): 
+async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE): 
     message = update.message.text.lower() 
 
     if message == 'start': 
-        context.bot.send_message(chat_id=update.effective_chat.id, text='Это окончательное сообщение.') 
+        await update.message.reply_text('Это окончательное сообщение.') 
     else: 
-        context.bot.send_message(chat_id=update.effective_chat.id, text='Я уже все сказал. :)') 
+        await update.message.reply_text('Я уже все сказал. :)') 
 
 def main(): 
-    # Создание объекта Updater и передача токена вашего бота 
-    updater = Updater(token='YOUR_BOT_TOKEN', use_context=True) 
-
-    # Получение диспетчера для регистрации обработчиков 
-    dispatcher = updater.dispatcher 
+    # Создание приложения с токеном вашего бота 
+    application = ApplicationBuilder().token('YOUR_BOT_TOKEN').build() 
 
     # Регистрация обработчиков команды /start и входящих сообщений 
-    start_handler = CommandHandler('start', start) 
-    message_handler = MessageHandler(Filters.text & ~Filters.command, handle_message) 
-    dispatcher.add_handler(start_handler) 
-    dispatcher.add_handler(message_handler) 
+    application.add_handler(CommandHandler('start', start)) 
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message)) 
 
     # Запуск бота 
-    updater.start_polling() 
+    application.run_polling() 
 
 if __name__ == '__main__': 
     main() 
