@@ -1,10 +1,166 @@
-[project]
-name = "python-template"
-version = "0.1.0"
-description = ""
-authors = ["Your Name <you@example.com>"]
-requires-python = ">=3.11"
-dependencies = [
-    "python-telegram-bot>=20.0",
-    "telegram>=0.0.1",
-]
+from aiogram import Dispatcher, types
+from aiogram.filters import Command
+from aiogram.fsm.context import FSMContext
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
+
+# Импортируем состояния из главного файла
+from main import UserState
+
+# Создаем клавиатуры для вопросов
+transport_keyboard = ReplyKeyboardMarkup(
+    keyboard=[
+        [KeyboardButton(text="Личный автомобиль")],
+        [KeyboardButton(text="Общественный транспорт")],
+        [KeyboardButton(text="Такси/Каршеринг")],
+        [KeyboardButton(text="Другое")]
+    ],
+    resize_keyboard=True
+)
+
+housing_keyboard = ReplyKeyboardMarkup(
+    keyboard=[
+        [KeyboardButton(text="Собственное жилье")],
+        [KeyboardButton(text="Съемное жилье")],
+        [KeyboardButton(text="Коммунальные услуги")],
+        [KeyboardButton(text="Другое")]
+    ],
+    resize_keyboard=True
+)
+
+sto_keyboard = ReplyKeyboardMarkup(
+    keyboard=[
+        [KeyboardButton(text="Да, есть траты на СТО")],
+        [KeyboardButton(text="Нет, траты отсутствуют")]
+    ],
+    resize_keyboard=True
+)
+
+children_keyboard = ReplyKeyboardMarkup(
+    keyboard=[
+        [KeyboardButton(text="Да, есть траты на детей")],
+        [KeyboardButton(text="Нет, траты отсутствуют")]
+    ],
+    resize_keyboard=True
+)
+
+alimony_keyboard = ReplyKeyboardMarkup(
+    keyboard=[
+        [KeyboardButton(text="Да, есть траты на алименты")],
+        [KeyboardButton(text="Нет, траты отсутствуют")]
+    ],
+    resize_keyboard=True
+)
+
+def register_handlers(dp: Dispatcher):
+    """
+    Регистрирует все обработчики в диспетчере.
+    """
+    dp.message.register(cmd_start, Command("start"))
+    dp.message.register(process_nickname, UserState.waiting_for_nickname)
+    dp.message.register(process_age, UserState.waiting_for_age)
+    dp.message.register(process_budget, UserState.waiting_for_budget)
+    dp.message.register(process_transport_choice, UserState.waiting_for_transport_choice)
+    dp.message.register(process_housing_choice, UserState.waiting_for_housing_choice)
+    dp.message.register(process_sto_choice, UserState.waiting_for_sto_choice)
+    dp.message.register(process_children_choice, UserState.waiting_for_children_choice)
+    dp.message.register(process_alimony_choice, UserState.waiting_for_alimony_choice)
+
+async def cmd_start(message: types.Message, state: FSMContext):
+    """
+    Начинает диалог с новым пользователем, запрашивая никнейм.
+    """
+    await state.set_state(UserState.waiting_for_nickname)
+    welcome_message = (
+        "👋 Здравствуйте! Давайте познакомимся.\n\n"
+        "━━━━━━━━━━━━━━━━━━\n"
+        "Для вашей конфиденциальности и в соответствии с ФЗ-152 \"О персональных данных\" (ст. 3) прошу:\n\n"
+        "• Не использовать реальное имя (Иван, Анна и т.д.).\n"
+        "• Выбрать нейтральный никнейм - он не должен позволять идентифицировать вас.\n\n"
+        "━━━━━━━━━━━━━━━━━━\n"
+        "👍🏻 Примеры подходящих ников:\n"
+        "Mars_Explorer  Quantum_Learner  Чайка_88\n\n"
+        "👎🏻 Примеры НЕподходящих:\n"
+        "ИванПетров  Anna_Sidorova_1995  Ирина227\n\n"
+        "Пожалуйста, напишите — как к вам обращаться?"
+    )
+    await message.answer(welcome_message)
+
+async def process_nickname(message: types.Message, state: FSMContext):
+    nickname = message.text
+    await state.update_data(name=nickname)
+    await state.set_state(UserState.waiting_for_age)
+    await message.answer(f"Здравствуйте, {nickname}! Введите ваш возраст (например, 25).")
+
+async def process_age(message: types.Message, state: FSMContext):
+    try:
+        age = int(message.text)
+        if 0 < age < 120:
+            await state.update_data(age=age)
+            await state.set_state(UserState.waiting_for_budget)
+            await message.answer("Теперь введите ваш бюджет в рублях (например, 50000).")
+        else:
+            await message.answer("Возраст указан неверно. Пожалуйста, введите число от 1 до 119.")
+    except (ValueError, TypeError):
+        await message.answer("Возраст указан неверно. Пожалуйста, введите число, например: 30.")
+
+async def process_budget(message: types.Message, state: FSMContext):
+    try:
+        budget = int(message.text)
+        if budget >= 0:
+            await state.update_data(budget=budget)
+            await state.set_state(UserState.waiting_for_transport_choice)
+            # Отправляем вопрос и клавиатуру
+            await message.answer("Какой вид транспорта вы предпочитаете?", reply_markup=transport_keyboard)
+        else:
+            await message.answer("Бюджет введен неверно. Пожалуйста, введите положительное число.")
+    except (ValueError, TypeError):
+        await message.answer("Бюджет введен неверно. Пожалуйста, введите число, например: 50000.")
+
+async def process_transport_choice(message: types.Message, state: FSMContext):
+    transport_choice = message.text
+    await state.update_data(transport_type=transport_choice)
+    await state.set_state(UserState.waiting_for_housing_choice)
+    # Отправляем вопрос и клавиатуру
+    await message.answer("Где вы живете?", reply_markup=housing_keyboard)
+
+async def process_housing_choice(message: types.Message, state: FSMContext):
+    housing_choice = message.text
+    await state.update_data(housing_type=housing_choice)
+    await state.set_state(UserState.waiting_for_sto_choice)
+    # Отправляем вопрос и клавиатуру
+    await message.answer("Есть ли у вас траты на СТО?", reply_markup=sto_keyboard)
+
+async def process_sto_choice(message: types.Message, state: FSMContext):
+    sto_choice = message.text
+    await state.update_data(sto_type=sto_choice)
+    await state.set_state(UserState.waiting_for_children_choice)
+    # Отправляем вопрос и клавиатуру
+    await message.answer("Есть ли у вас траты на детей?", reply_markup=children_keyboard)
+
+async def process_children_choice(message: types.Message, state: FSMContext):
+    children_choice = message.text
+    await state.update_data(children_type=children_choice)
+    await state.set_state(UserState.waiting_for_alimony_choice)
+    # Отправляем вопрос и клавиатуру
+    await message.answer("Есть ли у вас траты на алименты?", reply_markup=alimony_keyboard)
+
+async def process_alimony_choice(message: types.Message, state: FSMContext):
+    alimony_choice = message.text
+    await state.update_data(alimony_type=alimony_choice)
+
+    user_data = await state.get_data()
+
+    summary_message = (
+        f"Отлично, {user_data.get('name', 'Пользователь')}! Вот ваши данные:\n\n"
+        f"• Возраст: {user_data.get('age')}\n"
+        f"• Бюджет: {user_data.get('budget')} руб.\n"
+        f"• Вид транспорта: {user_data.get('transport_type')}\n"
+        f"• Тип жилья: {user_data.get('housing_type')}\n"
+        f"• Траты на СТО: {user_data.get('sto_type')}\n"
+        f"• Траты на детей: {user_data.get('children_type')}\n"
+        f"• Траты на алименты: {user_data.get('alimony_type')}\n\n"
+        "Диалог завершен. Чтобы начать снова, введите /start."
+    )
+    await message.answer(summary_message, reply_markup=ReplyKeyboardRemove())
+
+    await state.clear()

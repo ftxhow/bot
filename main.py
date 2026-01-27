@@ -1,33 +1,44 @@
+import asyncio
 import logging
-from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes, MessageHandler, filters
+from aiogram import Bot, Dispatcher, Router, types
+from aiogram.fsm.storage.memory import MemoryStorage
+from aiogram.fsm.context import FSMContext
+from global_state import TOKEN
 
-# Настройка логирования 
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO) 
+# Импорт всех хендлеров
+from handlers import start, profile, menu
 
-# Функция обработки команды /start 
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE): 
-    await update.message.reply_text('Привет! Я бот. Напиши "start", чтобы продолжить.') 
+logging.basicConfig(level=logging.INFO)
 
-# Функция обработки входящих сообщений 
-async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE): 
-    message = update.message.text.lower() 
+# Debug router для отлова необработанных сообщений
+debug_router = Router()
 
-    if message == 'start': 
-        await update.message.reply_text('Это окончательное сообщение.') 
-    else: 
-        await update.message.reply_text('Я уже все сказал. :)') 
+@debug_router.callback_query()
+async def _debug_any_callback(cb: types.CallbackQuery, state: FSMContext):
+    st = await state.get_state()
+    logging.warning(f"UNHANDLED CALLBACK: data={cb.data!r}, state={st}")
+    await cb.answer()
 
-def main(): 
-    # Создание приложения с токеном вашего бота 
-    application = ApplicationBuilder().token('YOUR_BOT_TOKEN').build() 
+@debug_router.message()
+async def _debug_any_message(msg: types.Message, state: FSMContext):
+    st = await state.get_state()
+    logging.warning(f"UNHANDLED MESSAGE: text={msg.text!r}, state={st}")
 
-    # Регистрация обработчиков команды /start и входящих сообщений 
-    application.add_handler(CommandHandler('start', start)) 
-    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message)) 
 
-    # Запуск бота 
-    application.run_polling() 
+async def main():
+    bot = Bot(token=TOKEN)
+    dp = Dispatcher(storage=MemoryStorage())
 
-if __name__ == '__main__': 
-    main() 
+    # Регистрируем все обработчики
+    dp.include_router(start.router)
+    dp.include_router(profile.router)
+    dp.include_router(menu.router)
+    
+    # Debug router регистрируем последним - он ловит всё необработанное
+    dp.include_router(debug_router)
+
+    logging.info("✅ Бот запущен и слушает обновления...")
+    await dp.start_polling(bot)
+
+if __name__ == "__main__":
+    asyncio.run(main())

@@ -1,0 +1,144 @@
+{
+  "1147919983": [
+    {
+      "amount": -2000.0,
+      "note": "аренда",
+      "category": "Жильё",
+      "currency": "RUB"
+    },
+    {
+      "amount": -2000.0,
+      "note": "аренда",
+      "category": "Жильё",
+      "currency": "RUB"
+    },
+    {
+      "amount": -2000.0,
+      "note": "маашина",
+      "category": null,
+      "currency": "RUB"
+    },
+    {
+      "amount": -3000.0,
+      "note": "",
+      "category": null,
+      "currency": "RUB"
+    },
+    {
+      "amount": 3000.0,
+      "note": "зп",
+      "category": "Доход",
+      "currency": "RUB"
+    },
+    {
+      "amount": -19000.0,
+      "note": "кофе",
+      "category": "Питание",
+      "currency": "RUB"
+    },
+    {
+      "amount": -1000.0,
+      "note": "машина",
+      "category": "Транспорт",
+      "currency": "RUB"
+    },
+    {
+      "amount": -100000.0,
+      "note": "аренда",
+      "category": "Жильё",
+      "currency": "RUB"
+    },
+    {
+      "amount": -3000000.0,
+      "note": "pg",
+      "category": null,
+      "currency": "RUB"
+    },
+    {
+      "amount": -3000000.0,
+      "note": "зп",
+      "category": "Доход",
+      "currency": "RUB"
+    },
+    {
+      "amount": -300.0,
+      "note": "pg",
+      "category": null,
+      "currency": "RUB"
+    },
+    {
+      "amount": 4000.0,
+      "note": "кофе",
+      "category": "Питание",
+      "currency": "RUB"
+    },
+    {
+      "amount": -15000.0,
+      "note": "алименты",
+      "category": null,
+      "currency": "RUB"
+    }
+  ],
+  "68976689": [
+    {
+      "amount": 350.0,
+      "note": "кофе",
+      "category": "Питание",
+      "currency": "RUB"
+    },
+    {
+      "amount": -200.0,
+      "note": "кофе",
+      "category": "Питание",
+      "currency": "RUB"
+    },
+    {
+      "amount": 100000.0,
+      "note": "зп",
+      "category": "Доход",
+      "currency": "RUB"
+    },
+    {
+      "amount": -400.0,
+      "note": "пицца",
+      "category": null,
+      "currency": "RUB"
+    },
+    {
+      "amount": -300.0,
+      "note": "кек",
+      "category": null,
+      "currency": "RUB"
+    },
+    {
+      "amount": 200.0,
+      "note": "еда",
+      "category": "Питание",
+      "currency": "RUB"
+    },
+    {
+      "amount": -15000.0,
+      "note": "алименты",
+      "category": null,
+      "currency": "RUB"
+    },
+    {
+      "amount": -15000.0,
+      "note": "машина",
+      "category": "Транспорт",
+      "currency": "RUB"
+    },
+    {
+      "amount": -2000.0,
+      "note": "цветочки",
+      "category": null,
+      "currency": "RUB"
+    },
+    {
+      "amount": 100.0,
+      "note": "долги",
+      "category": null,
+      "currency": "RUB"
+    }
+  ]
+}
